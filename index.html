@@ -8,11 +8,15 @@
 </head>
 <body>
     <div id="game-container">
-        <div id="grid"></div>
-        <div id="info">
-            <p>Счёт: <span id="score">0</span></p>
-            <p>Уровень: <span id="level">1</span></p>
+        <div id="top-bar">
+            <div id="score">Счёт: <span>0</span></div>
+            <div id="level">Уровень: <span>1</span></div>
+            <select id="color-scheme-selector">
+                <option value="default">Default</option>
+            </select>
+             <div id="timer">Время: <span>0</span></div>
         </div>
+        <div id="grid"></div>
     </div>
     <script src="js/script.js"></script>
 </body>

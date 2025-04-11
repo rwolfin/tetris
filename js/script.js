@@ -1,28 +1,32 @@
-const grid = document.getElementById('grid');
-const scoreDisplay = document.getElementById('score');
-const levelDisplay = document.getElementById('level');
 
-const gridWidth = 10;
-const gridHeight = 20;
-let gridArray = Array(gridWidth * gridHeight).fill(0); // 0 - пустая ячейка
+const grid = document.getElementById('grid');
+const scoreDisplay = document.getElementById('score').querySelector('span');
+const levelDisplay = document.getElementById('level').querySelector('span');
+const colorSchemeSelector = document.getElementById('color-scheme-selector');
+const timerDisplay = document.getElementById('timer').querySelector('span');
+
+const cell_size = 15;
+const gridWidth = Math.floor(2028 / cell_size);   // 135
+const gridHeight = Math.floor(847 / cell_size);  // 56
+let gridArray = Array(gridWidth * gridHeight).fill(0);
 
 const colors = ['blue', 'cyan', 'green', 'orange', 'purple', 'red', 'yellow'];
 
 const shapes = [
     // I
-    [[0, 1, 2, 3], [2, 12, 22, 32]],
+    [[0, 1, 2, 3], [0, gridWidth, 2 * gridWidth, 3 * gridWidth]],
     // L
-    [[1, 2, 11, 21], [0, 1, 2, 12], [1, 11, 21, 20], [0, 10, 11, 12]],
+    [[0, 1, gridWidth + 1, 2 * gridWidth + 1], [0, gridWidth, gridWidth + 1, gridWidth + 2], [1, gridWidth + 1, 2 * gridWidth + 1, 2 * gridWidth], [gridWidth, gridWidth + 1, gridWidth + 2, 2]],
     // J
-    [[0, 1, 11, 21], [1, 11, 12, 2], [1, 11, 21, 22], [0, 10, 1, 2]],
+    [[1, 2, gridWidth+2, 2*gridWidth+2], [gridWidth+1, 2*gridWidth+1, 2*gridWidth+2, 2], [1, gridWidth+1, 2*gridWidth+1, 2*gridWidth], [gridWidth, gridWidth+1, gridWidth+2, 2]],
     // T
-    [[1, 10, 11, 12], [1, 11, 21, 12], [10, 11, 12, 21], [1, 10, 11, 21]],
+    [[1, gridWidth, gridWidth + 1, gridWidth + 2], [1, gridWidth + 1, 2 * gridWidth + 1, gridWidth + 2], [gridWidth, gridWidth + 1, gridWidth + 2, 2 * gridWidth + 1], [1, gridWidth, gridWidth + 1, 2 * gridWidth + 1]],
     // Z
-    [[0, 1, 11, 12], [2, 11, 12, 21]],
+    [[0, 1, gridWidth + 1, gridWidth + 2], [1, gridWidth, gridWidth + 1, 2 * gridWidth]],
     // S
-    [[1, 2, 10, 11], [0, 10, 11, 21]],
+    [[1, 2, gridWidth, gridWidth + 1], [0, gridWidth, gridWidth + 1, 2 * gridWidth + 1]],
     // O
-    [[0, 1, 10, 11]],
+    [[0, 1, gridWidth, gridWidth + 1]],
 ];
 
 
@@ -33,10 +37,13 @@ let currentShapeColor;
 let score = 0;
 let level = 1;
 let gameTimer;
-let gameSpeed = 500;
+let gameSpeed = 750;
 
+let seconds = 0;
+let timerInterval;
 
 function createGrid() {
+    grid.innerHTML = ''; // Очищаем старую сетку
     for (let i = 0; i < gridWidth * gridHeight; i++) {
         const cell = document.createElement('div');
         cell.classList.add('cell');
@@ -45,13 +52,12 @@ function createGrid() {
 }
 
 function draw() {
-    // Сначала очищаем сетку, удаляя классы .filled и color
     const cells = grid.querySelectorAll('.cell');
     cells.forEach((cell, index) => {
         cell.classList.remove('filled');
         colors.forEach(color => cell.classList.remove(color));
         if (gridArray[index]) {
-            cell.classList.add('filled', colors[gridArray[index] -1 ]); // gridArray хранит номера цветов
+            cell.classList.add('filled', colors[gridArray[index] - 1]);
         }
     });
 
@@ -65,20 +71,17 @@ function draw() {
     }
 }
 
-
 function getRandomShape() {
     const randomIndex = Math.floor(Math.random() * shapes.length);
     currentShapeColor = colors[randomIndex];
     return shapes[randomIndex];
-
 }
 
-
 function createNewShape() {
-    currentShape = getRandomShape()[0]; // Берем первую ротацию новой фигуры
+    currentShape = getRandomShape()[0];
     currentRotation = 0;
-    currentShapePos = Math.floor(gridWidth / 2) - 2; // Начальная позиция в центре сверху
-    if(checkCollision())
+    currentShapePos = Math.floor(gridWidth / 2) - (Math.floor(Math.random() * 6) - 3);
+    if (checkCollision())
         endGame();
     draw();
 }
@@ -99,15 +102,12 @@ function rotateShape() {
     currentShape = rotatedShape;
     if (checkCollision()) {
         currentShape = prevShape;
-        return; // Возвращаем старую фигуру
+        return;
     }
 
     currentRotation = newRotation;
     draw();
-
 }
-
-
 
 function moveShapeDown() {
     currentShapePos += gridWidth;
@@ -122,7 +122,13 @@ function moveShapeDown() {
 
 function moveShapeLeft() {
     currentShapePos--;
-    if(checkCollision()){
+    // Wrap around
+    if (currentShape.some(index => (currentShapePos + index) % gridWidth === gridWidth - 1 || (currentShapePos + index) % gridWidth < 0)) {
+        currentShapePos++;
+        return;
+    }
+
+    if (checkCollision()) {
         currentShapePos++;
         return;
     }
@@ -131,7 +137,13 @@ function moveShapeLeft() {
 
 function moveShapeRight() {
     currentShapePos++;
-    if(checkCollision()){
+    // Wrap around
+    if (currentShape.some(index => (currentShapePos + index) % gridWidth === 0 || (currentShapePos + index) % gridWidth > gridWidth - 1)) {
+        currentShapePos--;
+        return;
+    }
+
+    if (checkCollision()) {
         currentShapePos--;
         return;
     }
@@ -142,10 +154,9 @@ function freezeShape() {
     currentShape.forEach(index => {
         const gridIndex = currentShapePos + index;
         if (gridIndex >= 0 && gridIndex < gridArray.length)
-            gridArray[gridIndex] = colors.indexOf(currentShapeColor) + 1; // Записываем цвет фигуры
+            gridArray[gridIndex] = colors.indexOf(currentShapeColor) + 1;
     });
 }
-
 
 function removeFullRows() {
     for (let row = 0; row < gridHeight; row++) {
@@ -170,24 +181,32 @@ function removeFullRows() {
     }
 }
 
+function updateTimer() {
+    seconds++;
+    timerDisplay.textContent = seconds;
+}
 
 function startGame() {
     createGrid();
     createNewShape();
     gameTimer = setInterval(moveShapeDown, gameSpeed);
+    timerInterval = setInterval(updateTimer, 1000);
     draw();
 }
 
 function endGame() {
     clearInterval(gameTimer);
+    clearInterval(timerInterval);
     alert("Game Over! Score: " + score);
     gridArray = Array(gridWidth * gridHeight).fill(0);
     score = 0;
     level = 1;
+    seconds = 0;
     scoreDisplay.textContent = score;
     levelDisplay.textContent = level;
-    draw();
+    timerDisplay.textContent = seconds;
 
+    draw();
 }
 
 document.addEventListener('keydown', event => {

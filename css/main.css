@@ -1,35 +1,67 @@
-#game-container {
-    display: flex;
-    justify-content: center;
-    margin-top: 50px;
+/* css/main.css */
+body {
+    margin: 0;
+    overflow: hidden; /* Убирает полосы прокрутки */
+    background-color: #000; /* Черный фон */
 }
 
+#game-container {
+    width: 100vw; /* На всю ширину экрана */
+    height: 100vh; /* На всю высоту экрана */
+    display: flex;
+    flex-direction: column;
+}
+
+#top-bar {
+    background-color: #363535;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    gap: 20px; /* Расстояние между элементами */
+}
+
+
 #grid {
+    width: 2028px;
+    height: 847px;
     display: grid;
-    grid-template-columns: repeat(10, 20px);
-    grid-template-rows: repeat(20, 20px);
-    border: 2px solid black;
+    grid-template-columns: repeat(auto-fill, 15px); /* Автоматическое заполнение колонками по 15px */
+    grid-template-rows: repeat(auto-fill, 15px); /* Автоматическое заполнение строками по 15px */
+    box-sizing: border-box;
+    margin:auto;
 }
 
 .cell {
-    width: 20px;
-    height: 20px;
-    border: 1px solid #ccc;
+    width: 15px;
+    height: 15px;
+    border: 1px solid #222;
     box-sizing: border-box;
 }
 
 .filled {
-    border: 1px solid black;
+    border: 1px solid #000; /* Черная граница для заполненных ячеек */
 }
 
-.blue { background-color: blue; }
-.cyan { background-color: cyan; }
-.green { background-color: green; }
-.orange { background-color: orange; }
-.purple { background-color: purple; }
-.red { background-color: red; }
-.yellow { background-color: yellow; }
+/* Цвета фигур. Изначально зададим цвета как на картинке, потом будем менять */
+.blue { background-color: rgb(70, 70, 202); }
+.cyan { background-color: rgb(91, 214, 214); }
+.green { background-color: rgb(77, 190, 77); }
+.orange { background-color: rgb(236, 165, 34); }
+.purple { background-color: rgb(177, 38, 177); }
+.red { background-color: rgb(194, 39, 39); }
+.yellow { background-color: rgb(250, 206, 12); }
 
-#info {
-    margin-left: 20px;
+#color-scheme-selector {
+    background-color: #fff;
+    color: #333;
+    border: 1px solid #ccc;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#color-scheme-selector:hover {
+    border-color: #999;
 }
