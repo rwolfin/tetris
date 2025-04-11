@@ -1,6 +1,5 @@
 ## Большой Тетрис
 
-!(title.jpg)[assets/title.jpg]
 
 ![Большой тетрис](assets/title.jpg)
 
