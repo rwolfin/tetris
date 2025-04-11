@@ -1,0 +1,35 @@
+#game-container {
+    display: flex;
+    justify-content: center;
+    margin-top: 50px;
+}
+
+#grid {
+    display: grid;
+    grid-template-columns: repeat(10, 20px);
+    grid-template-rows: repeat(20, 20px);
+    border: 2px solid black;
+}
+
+.cell {
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ccc;
+    box-sizing: border-box;
+}
+
+.filled {
+    border: 1px solid black;
+}
+
+.blue { background-color: blue; }
+.cyan { background-color: cyan; }
+.green { background-color: green; }
+.orange { background-color: orange; }
+.purple { background-color: purple; }
+.red { background-color: red; }
+.yellow { background-color: yellow; }
+
+#info {
+    margin-left: 20px;
+}
