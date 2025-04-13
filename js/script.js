@@ -18,7 +18,7 @@ const shapes = [
     // L
     [[0, 1, gridWidth + 1, 2 * gridWidth + 1], [0, gridWidth, gridWidth + 1, gridWidth + 2], [1, gridWidth + 1, 2 * gridWidth + 1, 2 * gridWidth], [gridWidth, gridWidth + 1, gridWidth + 2, 2]],
     // J
-    [[1, 2, gridWidth+2, 2*gridWidth+2], [gridWidth+1, 2*gridWidth+1, 2*gridWidth+2, 2], [1, gridWidth+1, 2*gridWidth+1, 2*gridWidth], [gridWidth, gridWidth+1, gridWidth+2, 2]],
+    [[1, 2, gridWidth + 2, 2 * gridWidth + 2], [gridWidth + 1, 2 * gridWidth + 1, 2 * gridWidth + 2, 2], [1, gridWidth + 1, 2 * gridWidth + 1, 2 * gridWidth], [gridWidth, gridWidth + 1, gridWidth + 2, 2]],
     // T
     [[1, gridWidth, gridWidth + 1, gridWidth + 2], [1, gridWidth + 1, 2 * gridWidth + 1, gridWidth + 2], [gridWidth, gridWidth + 1, gridWidth + 2, 2 * gridWidth + 1], [1, gridWidth, gridWidth + 1, 2 * gridWidth + 1]],
     // Z
@@ -41,6 +41,7 @@ let gameSpeed = 750;
 
 let seconds = 0;
 let timerInterval;
+let shadowShapePos; // Добавлено
 
 function createGrid() {
     grid.innerHTML = ''; // Очищаем старую сетку
@@ -51,15 +52,56 @@ function createGrid() {
     }
 }
 
+function calculateShadowPosition() { // Добавлено
+    shadowShapePos = currentShapePos;
+    while (true) {
+        shadowShapePos += gridWidth;
+        let tempShape = currentShape.map(index => index);
+        if (tempShape.some(index => {
+            const gridIndex = shadowShapePos + index;
+            if (gridIndex >= gridArray.length) return true;
+            if (gridIndex < 0) return true;  // Проверка верхней границы
+            return gridArray[gridIndex] !== 0;
+        })) {
+            shadowShapePos -= gridWidth;
+            break;
+        }
+    }
+}
+
+function drawShadow() { // Добавлено
+    if (!currentShape) return;
+
+    calculateShadowPosition();
+    const cells = grid.querySelectorAll('.cell');
+
+    currentShape.forEach(index => {
+        const gridIndex = shadowShapePos + index;
+        if (gridIndex >= 0 && gridIndex < gridArray.length) {
+            cells[gridIndex].classList.add('shadow');
+        }
+    });
+}
+
+function clearShadow() { // Добавлено
+    const cells = grid.querySelectorAll('.cell');
+    cells.forEach(cell => cell.classList.remove('shadow'));
+}
+
 function draw() {
     const cells = grid.querySelectorAll('.cell');
     cells.forEach((cell, index) => {
         cell.classList.remove('filled');
         colors.forEach(color => cell.classList.remove(color));
+        cell.classList.remove('shadow'); // Удаляем класс тени
         if (gridArray[index]) {
             cell.classList.add('filled', colors[gridArray[index] - 1]);
         }
     });
+
+    if (currentShape) {
+        drawShadow();
+    }
 
     if (currentShape) {
         currentShape.forEach(index => {
@@ -83,8 +125,9 @@ function createNewShape() {
     currentShapePos = Math.floor(gridWidth / 2) - (Math.floor(Math.random() * 6) - 3);
     if (checkCollision())
         endGame();
-    draw();
+    draw(); // Обновляем экран, чтобы тень сразу появилась
 }
+
 
 function checkCollision() {
     return currentShape.some(index => {
@@ -96,6 +139,7 @@ function checkCollision() {
 }
 
 function rotateShape() {
+    clearShadow(); // Очищаем старую тень
     let newRotation = currentRotation === shapes[colors.indexOf(currentShapeColor)].length - 1 ? 0 : currentRotation + 1;
     let rotatedShape = shapes[colors.indexOf(currentShapeColor)][newRotation];
     let prevShape = currentShape;
@@ -110,6 +154,7 @@ function rotateShape() {
 }
 
 function moveShapeDown() {
+    clearShadow();  // Очищаем старую тень
     currentShapePos += gridWidth;
     if (checkCollision()) {
         currentShapePos -= gridWidth;
@@ -121,8 +166,9 @@ function moveShapeDown() {
 }
 
 function moveShapeLeft() {
+    clearShadow(); // Очищаем старую тень
     currentShapePos--;
-    // Wrap around
+
     if (currentShape.some(index => (currentShapePos + index) % gridWidth === gridWidth - 1 || (currentShapePos + index) % gridWidth < 0)) {
         currentShapePos++;
         return;
@@ -136,8 +182,9 @@ function moveShapeLeft() {
 }
 
 function moveShapeRight() {
+    clearShadow(); // Очищаем старую тень
     currentShapePos++;
-    // Wrap around
+
     if (currentShape.some(index => (currentShapePos + index) % gridWidth === 0 || (currentShapePos + index) % gridWidth > gridWidth - 1)) {
         currentShapePos--;
         return;

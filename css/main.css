@@ -31,7 +31,7 @@ body {
     grid-template-columns: repeat(auto-fill, 15px); /* Автоматическое заполнение колонками по 15px */
     grid-template-rows: repeat(auto-fill, 15px); /* Автоматическое заполнение строками по 15px */
     box-sizing: border-box;
-    margin:auto;
+    margin: auto;
 }
 
 .cell {
@@ -53,6 +53,11 @@ body {
 .purple { background-color: rgb(177, 38, 177); }
 .red { background-color: rgb(194, 39, 39); }
 .yellow { background-color: rgb(250, 206, 12); }
+
+.shadow {
+    background-color: rgba(255, 255, 255, 0.2) !important; /* Полупрозрачный белый цвет */
+    border: 1px dashed #444; /* Пунктирная граница */
+}
 
 #color-scheme-selector {
     background-color: #fff;
