@@ -267,7 +267,24 @@ document.addEventListener('keydown', event => {
     }
     else if (event.code === 'ArrowUp') {
         rotateShape();
+    } else if (event.code === 'ControlLeft' || event.code === 'ControlRight') {  // Добавлено
+        hardDrop();
     }
 });
+
+function hardDrop() {
+    clearShadow();
+    while (true) {
+        currentShapePos += gridWidth;
+        if (checkCollision()) {
+            currentShapePos -= gridWidth;
+            freezeShape();
+            removeFullRows();
+            createNewShape();
+            break;
+        }
+    }
+    draw();
+}
 
 startGame();
