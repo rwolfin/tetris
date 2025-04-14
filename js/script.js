@@ -122,7 +122,14 @@ function getRandomShape() {
 function createNewShape() {
     currentShape = getRandomShape()[0];
     currentRotation = 0;
-    currentShapePos = Math.floor(gridWidth / 2) - (Math.floor(Math.random() * 6) - 3);
+
+    // Рассчитываем допустимую ширину для размещения фигуры
+    const shapeWidth = Math.max(...currentShape.map(index => index % gridWidth)) + 1;
+
+    // Генерируем случайную начальную позицию, учитывая ширину фигуры
+    const maxPosition = gridWidth - shapeWidth;
+    currentShapePos = Math.floor(Math.random() * (maxPosition + 1));  // +1 чтобы maxPosition тоже был возможен
+
     if (checkCollision())
         endGame();
     draw(); // Обновляем экран, чтобы тень сразу появилась
